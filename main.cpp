@@ -1,7 +1,7 @@
 #include <iostream>
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "Puto el que lo lea" << std::endl;
     return 0;
 }
 
