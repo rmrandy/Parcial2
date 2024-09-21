@@ -60,16 +60,14 @@ void handleSeatClick(RenderWindow &window) {
     for (auto& seat : seats) {
         // Verificar si el clic fue dentro del área del asiento
         if (seat.shape.getGlobalBounds().contains(window.mapPixelToCoords(sf::Mouse::getPosition(window)))) {
-            if (seat.isReserved) {
-                // Si el asiento está reservado, lo ponemos disponible (rojo)
-                seat.color = Color::Green;
-                seat.isReserved = false;
-                cout << "Asiento " << seat.seatNumber << " ahora está disponible.\n";
-            } else {
-                // Si el asiento está disponible (rojo), lo reservamos de nuevo (verde)
-                seat.color = Color::Green;
-                seat.isReserved = true;
-                cout << "Asiento " << seat.seatNumber << " ahora está reservado.\n";
+            if (seat.color == Color::White) {
+                // Si el asiento es blanco, cambiar a rojo
+                seat.color = Color::Red;
+                cout << "Asiento " << seat.seatNumber << " cambiado a reservado.\n";
+            } else if (seat.color == Color::Red) {
+                // Si el asiento es rojo, cambiar a blanco
+                seat.color = Color::White;
+                cout << "Asiento " << seat.seatNumber << " cambiado a disponible.\n";
             }
         }
     }
@@ -78,8 +76,6 @@ void handleSeatClick(RenderWindow &window) {
 }
 
 int main() {
-    
-    
     // Crear una ventana de 800x800 píxeles
     RenderWindow window(VideoMode(800, 800), "Reserva de Asientos");
 
