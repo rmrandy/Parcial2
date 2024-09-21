@@ -1,7 +1,9 @@
 #include <iostream>
 
+using std::cout, std::cin, std::endl;
+
 int main() {
-    std::cout << "Puto el que lo lea" << std::endl;
+    
     return 0;
 }
 
