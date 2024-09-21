@@ -1,4 +1,5 @@
 #include <iostream>
+#include <pthread.h>
 #include <SFML/Graphics.hpp>
 
 using std::cout, std::cin, std::endl;
@@ -6,12 +7,12 @@ using sf::RenderWindow, sf::VideoMode, sf::CircleShape, sf::Event, sf::Color;
 
 int main() {
     // Crear una ventana con un tamaño de 800x600 píxeles
-    RenderWindow window(VideoMode(800, 600), "Ventana SFML");
+    RenderWindow window(VideoMode(800, 800), "Segundo Examen Parcial Pablo Flores, Randy Rivera, Katherine Dieguez");
 
     // Crear un círculo con un radio de 50 píxeles
-    //sf::CircleShape circle(50);
+    CircleShape circle(50);
     // Establecer el color del círculo a verde
-    //circle.setFillColor(sf::Color::Green);
+    circle.setFillColor(Color::Green);
 
     // Bucle principal de la aplicación
     while (window.isOpen())
@@ -28,7 +29,7 @@ int main() {
         window.clear(Color::Black);
 
         // Dibujar el círculo en la ventana
-        //window.draw(circle);
+        window.draw(circle);
 
         // Mostrar lo que se ha dibujado hasta ahora
         window.display();
