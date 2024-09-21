@@ -4,13 +4,10 @@
 #include <mutex>
 #include <vector>
 
-
 using std::cout, std::cin, std::endl;
 using sf::RenderWindow, sf::VideoMode, sf::RectangleShape, sf::Vector2f, sf::Event, sf::Color;
 
-
 std::mutex seatMutex;
-
 
 struct Seat {
     int seatNumber;
@@ -81,23 +78,36 @@ void handleSeatClick(RenderWindow &window) {
 }
 
 int main() {
+    
+    
     // Crear una ventana de 800x800 píxeles
     RenderWindow window(VideoMode(800, 800), "Reserva de Asientos");
 
     // Inicializar los asientos
-    const int numSeats = 10;  // Número de asientos en total
+    const int numSeats = 30;  // Número de asientos en total (cambia este valor para más asientos)
+    const int seatsPerRow = 10;  // Asientos por fila
+    const float seatSpacing = 30.f;  // Espacio entre asientos
+    const float rowSpacing = 50.f;   // Espacio entre filas
+    const float initialX = 30.f;  // Posición inicial en X
+    const float initialY = 100.f; // Posición inicial en Y
+
     for (int i = 0; i < numSeats; i++) {
         Seat seat;
         seat.seatNumber = i + 1;
         seat.color = Color::White;  // Inicialmente todos los asientos están sin reservar
         seat.isReserved = false;    // No están reservados
         seat.shape.setSize(Vector2f(25.f, 25.f));
-        seat.shape.setPosition(30.f * (i + 1), 100.f);  // Posición basada en el número de asiento
+
+        // Calcular la posición del asiento basado en el número de asiento
+        float x = initialX + seatSpacing * (i % seatsPerRow);  // Colocar asiento en X
+        float y = initialY + rowSpacing * (i / seatsPerRow);   // Colocar asiento en Y para las filas
+
+        seat.shape.setPosition(x, y);
         seats.push_back(seat);
     }
 
     // Crear múltiples hilos que simulan la reserva de asientos
-    const int numUsers = 10;  // Número de usuarios simulados
+    const int numUsers = numSeats;  // Número de usuarios simulados
     pthread_t seatThreads[numUsers];
     int seatNumbers[numUsers];
 
