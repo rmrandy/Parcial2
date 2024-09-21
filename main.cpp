@@ -1,80 +1,100 @@
 #include <iostream>
 #include <pthread.h>
 #include <SFML/Graphics.hpp>
+#include <mutex>
+#include <vector>
 
 using std::cout, std::cin, std::endl;
-using sf::RenderWindow, sf::VideoMode, sf::CircleShape, sf::RectangleShape, sf::Thread, sf::Vector2f, sf::Event, sf::Color;
+using sf::RenderWindow, sf::VideoMode, sf::RectangleShape, sf::Vector2f, sf::Event, sf::Color;
 
-struct drawSeatParameters {
-    RenderWindow* window;
-    Color fillColor;
+
+std::mutex seatMutex;
+
+
+struct Seat {
+    int seatNumber;
+    Color color;
 };
 
-void* drawSeat(void* args){
-    drawSeatParameters* params = static_cast<drawSeatParameters*>(args);
-    RenderWindow* window = params->window;
-    Color fillColor = params->fillColor;
-    RectangleShape rectangle(Vector2f(25.f, 25.f));
-    rectangle.setFillColor(fillColor);
-    window->draw(rectangle);
+
+std::vector<Seat> reservedSeats;
+
+// Función que será ejecutada por cada hilo para reservar asientos
+void* reserveSeat(void* args) {
+    int seatNumber = *(int*)args;
+
+    // Simular tiempo de espera aleatorio (por ejemplo, para simular usuarios reservando en diferentes momentos)
+    sf::sleep(sf::milliseconds(rand() % 5000));
+
+    // Bloquear el acceso a la estructura de asientos
+    seatMutex.lock();
+
+    // Simular la reserva de un asiento
+    Seat seat;
+    seat.seatNumber = seatNumber;
+    seat.color = Color::Green;  // Reservar con color verde
+
+    // Agregar el asiento reservado al vector
+    reservedSeats.push_back(seat);
+
+    cout << "Asiento " << seatNumber << " reservado.\n";
+
+    // Desbloquear el acceso a la estructura de asientos
+    seatMutex.unlock();
+
     return NULL;
 }
 
-void renderingThread(RenderWindow* window)
-{
-    // activate the window's context
-    window->setActive(true);
+// Función para dibujar los asientos reservados en la ventana
+void drawSeats(RenderWindow &window) {
+    seatMutex.lock(); // Proteger el acceso a los asientos reservados
 
-    RectangleShape rectangle(Vector2f(25.f, 25.f));
-    rectangle.setFillColor(Color::Red);
-    // the rendering loop
-    while (window->isOpen())
-    {
-
-//        Event event;
-//        while (window->pollEvent(event)){
-//            if (event.type == Event::Closed)
-//                window->close();
-//        }
-        window->draw(rectangle);
-        // end the current frame
-        window->display();
+    for (const auto& seat : reservedSeats) {
+        RectangleShape rectangle(Vector2f(25.f, 25.f));
+        rectangle.setFillColor(seat.color);
+        rectangle.setPosition(30.f * seat.seatNumber, 100.f);  // Posición basada en el número de asiento
+        window.draw(rectangle);
     }
+
+    seatMutex.unlock(); // Desbloquear el acceso
 }
 
-
 int main() {
-    // Crear una ventana con un tamaño de 800x600 píxeles
-    RenderWindow window(VideoMode(800, 800), "Segundo Examen Parcial Pablo Flores, Randy Rivera, Katherine Dieguez");
+    // Crear una ventana de 800x800 píxeles
+    RenderWindow window(VideoMode(800, 800), "Reserva de Asientos");
 
-    window.setActive(false);
-    drawSeatParameters params;
+    // Crear múltiples hilos que simulan la reserva de asientos
+    const int numUsers = 9;  // Número de usuarios simulados
+    pthread_t seatThreads[numUsers];
+    int seatNumbers[numUsers];
 
-    params.window = &window;
-    params.fillColor = Color::Red;
+    for (int i = 0; i < numUsers; i++) {
+        seatNumbers[i] = i + 1;  // Asignar un número de asiento para cada hilo
+        pthread_create(&seatThreads[i], NULL, reserveSeat, &seatNumbers[i]);
+    }
 
-    Thread thread(&renderingThread, &window);
-    thread.launch();
-
-    // Bucle principal de la aplicación
-    while (window.isOpen())
-    {
+    // Bucle principal de la ventana
+    while (window.isOpen()) {
         Event event;
-        // Procesar los eventos de la ventana (como cerrar)
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             if (event.type == Event::Closed)
                 window.close();
         }
 
-        // Limpiar la ventana con un color negro
-        //window.clear(Color::Black);
+        // Limpiar la ventana
+        window.clear(Color::Black);
 
-        // Mostrar lo que se ha dibujado hasta ahora
-//        window.display();
+        // Dibujar los asientos reservados
+        drawSeats(window);
+
+        // Mostrar lo que se ha dibujado
+        window.display();
+    }
+
+    // Esperar a que todos los hilos terminen
+    for (int i = 0; i < numUsers; i++) {
+        pthread_join(seatThreads[i], NULL);
     }
 
     return 0;
 }
-
-
